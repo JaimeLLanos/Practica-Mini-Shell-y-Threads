@@ -3,34 +3,43 @@
 #include <stdlib.h>
 #include "parser.h"
 #include <string.h>
-#include <signal.h>
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
-		while(1){
-			signal(SIGINT, SIG_IGN); //ignorar Ctrol+C
-			int pipeP-H[2];
-			char buf[1024];
-			pipe(pipeP-H);
+		char buf[1024];
+		tline *entrada;
+		printf("msh> ");
+		while(fgets(buf,1024,stdin)){
 			pid_t pid;
+			int status;
 			pid = fork();
-			if(pid == 0){
-				close(pipeP-H[1]); //EL hijo va a recibir un mandato del padre
-				read(pipeP-H[0], buf, 1024);
-				signal(SIGINT, SIG_DFL);
-				//execvp(buf);
-				//exit(1);
-			}	
-			}else{
-				close(pipeP-H[0]); //El padre va a enviar un mandato	
-				//recoger la entrada de teclado
+			entrada = tokenize(buf);
+			if(entrada.ncommands == 1){
+				if(pid < 0){
+					printf("Falló el fork()");
+				}
+				else if(pid == 0){
+					if(entrada.commands[0].filename == NULL)
+						printf("El mandato especificado no existe");
+					else{
+						execvp(entrada.commands[0].argv[0], argv + 1);
+						printf("Error al ejecutar el comando");
+						exit(1);
+					}
+				} else{
+					wait(&status);
+					if(WIFEXITED(status) != 0)
+						if(WEXITSTATUS(status) != 0)
+							printf("El comando no se ejecutó correctamente");
+					exit(0);
+				}
 				
-				write(pipeP-H[1],
 			}
+			printf("msh> ");
 		}
-	}
-	else{
-		printf("El programa no necesita argumentos adicionales");
-		exit(1);
-	}
+	}else{
+		printf("La mini Shell no tiene que recibir ningun argumento");
+	}	
+}
+
 }
