@@ -8,7 +8,6 @@
 #include <sys/wait.h>
 
 void uncomando(tcommand *mandato){
-	
 	pid_t pid;
 	pid=fork();
 	if (pid<0) {
@@ -16,12 +15,15 @@ void uncomando(tcommand *mandato){
 	} else if (pid==0) {
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
-		printf("Soy el hijo, ejecuto el comando.\n");
-		execvp((*mandato).filename,(*mandato).argv);
-		printf("error execvp\n");
-		exit(1);
+		if((*mandato).filename == NULL){
+			printf("El mandato especificado no existe\n");
+			exit(1);
+		}else{
+			execvp((*mandato).filename,(*mandato).argv);
+			printf("error execvp\n");
+			exit(1);		
+		}
 	} else { 
-		printf("padre\n");
 		wait(NULL);
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, SIG_IGN);
@@ -38,7 +40,7 @@ int main(int argc, char* argv[]){ //inicio main
 	char buffer[1024];
 	if (argc==1) {
 		while (1) { //inicio de while
-			printf("msh> \n");
+			printf("msh> ");
 			fgets(buffer, 1024, stdin); //recogemos en buffer la variable de entrada de teclado
 			mandatos=tokenize(buffer);
 			if ((*mandatos).ncommands==1) {
