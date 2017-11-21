@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "parser.h"
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 int main(int argc, char *argv[]){
 	if(argc == 1){
@@ -14,15 +16,15 @@ int main(int argc, char *argv[]){
 			int status;
 			pid = fork();
 			entrada = tokenize(buf);
-			if(entrada.ncommands == 1){
+			if((*entrada).ncommands == 1){
 				if(pid < 0){
 					printf("Falló el fork()");
 				}
 				else if(pid == 0){
-					if(entrada.commands[0].filename == NULL)
+					if((*entrada).commands[0].filename == NULL)
 						printf("El mandato especificado no existe");
 					else{
-						execvp(entrada.commands[0].argv[0], argv + 1);
+						execvp((*entrada).commands[0].argv[0], argv + 1);
 						printf("Error al ejecutar el comando");
 						exit(1);
 					}
