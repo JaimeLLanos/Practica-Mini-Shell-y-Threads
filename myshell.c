@@ -76,7 +76,46 @@ void uncomando(tline *mandatos){
 		} //fin padre
 }//fin unmandato
 
-void varioscomandos(){
+void varioscomandos(tline *mandatos){
+	int p1[2];
+	int p2[2];
+	int comandos = (*mandatos).ncommands;
+	int *pipes[comandos];
+	int [comandos] pids;
+	int i;
+	for(i = 0; i < comandos; i++){//creamos tantos hijos como
+		pids[i] = fork();	   //procesos haya
+		if(pids[i] < 0){ //si no se puede crear el hijo
+			fprintf(stderr,"Ha ocurrido un error al crear el proceso");
+			exit(1);
+		}
+		if(pids[i] == 0){ //para el hijo i
+			pipe(p1);
+			pipe(p2);
+			p1 = pipes + i;
+			p2 = pipes + i - 1;
+			if(i == (comandos - 1)){
+				close(p1[0]);
+				dup2(p1[1],1);
+				close(p1[1]);
+			}else if(i != 0){
+				close(p1[1]);
+				dup2(p1[0], 0);
+				close(p1[0]);
+				close(p2[0]);
+				dup2(p2[1],1);
+				close(p2[1]);
+			}
+			else{
+				close(p1[1]);
+				dup2(p1[0],0);
+				close(p1[0]);
+				execvp((*mandatos).filename, (*mandatos).argv);
+				exit(1);
+			}
+		}
+
+	}			
 }
 
 int main(int argc, char* argv[]){ //inicio main
