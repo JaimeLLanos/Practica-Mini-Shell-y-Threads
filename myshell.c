@@ -79,9 +79,10 @@ void uncomando(tline *mandatos){
 void varioscomandos(tline *mandatos){
 	int p1[2];
 	int p2[2];
+	tcommand *mandato = (*mandatos).commands;
 	int comandos = (*mandatos).ncommands;
 	int *pipes[comandos];
-	int [comandos] pids;
+	int pids [comandos];
 	int i;
 	for(i = 0; i < comandos; i++){//creamos tantos hijos como
 		pids[i] = fork();	   //procesos haya
@@ -92,8 +93,8 @@ void varioscomandos(tline *mandatos){
 		if(pids[i] == 0){ //para el hijo i
 			pipe(p1);
 			pipe(p2);
-			p1 = pipes + i;
-			p2 = pipes + i - 1;
+			p1 = pipes + i; //problema a solucionar
+			p2 = pipes + i - 1; //problema a solucionar
 			if(i == (comandos - 1)){
 				close(p1[0]);
 				dup2(p1[1],1);
@@ -110,7 +111,7 @@ void varioscomandos(tline *mandatos){
 				close(p1[1]);
 				dup2(p1[0],0);
 				close(p1[0]);
-				execvp((*mandatos).filename, (*mandatos).argv);
+				execvp((*mandato).filename, (*mandato).argv);
 				exit(1);
 			}
 		}
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]){ //inicio main
 			if ((*mandatos).ncommands == 1) {
 				uncomando(mandatos);
 			} else if ((*mandatos).ncommands > 1) {
-				varioscomandos();
+				varioscomandos(mandatos);
 			}
 		} //fin del while
 	} else //fin del if
