@@ -8,6 +8,10 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+typedef struct {
+	int p[2];
+} tPipe;
+
 
 void *redireccionDeEntrada(tline *mandato){
 	int fd;	
@@ -77,47 +81,49 @@ void uncomando(tline *mandatos){
 }//fin unmandato
 
 void varioscomandos(tline *mandatos){
-	int p1[2];
-	int p2[2];
 	tcommand *mandato = (*mandatos).commands;
 	int comandos = (*mandatos).ncommands;
-	int *pipes[comandos];
+	tPipe pipes[comandos-1];
 	int pids [comandos];
 	int i;
+	tPipe p1;
+	tPipe p2;
+	for (i=0; i<comandos-1; i++){
+		pipe(pipes[i].p);
+ 	}// fin for creaccion de pipes
 	for(i = 0; i < comandos; i++){//creamos tantos hijos como
 		pids[i] = fork();	   //procesos haya
 		if(pids[i] < 0){ //si no se puede crear el hijo
 			fprintf(stderr,"Ha ocurrido un error al crear el proceso");
 			exit(1);
-		}
+		}// fin if de error
 		if(pids[i] == 0){ //para el hijo i
-			pipe(p1);
-			pipe(p2);
-			p1 = pipes + i; //problema a solucionar
-			p2 = pipes + i - 1; //problema a solucionar
 			if(i == (comandos - 1)){
-				close(p1[0]);
-				dup2(p1[1],1);
-				close(p1[1]);
+				p1=pipes[i];
+				close(p1.p[0]);
+				dup2(p1.p[1],1);
+				close(p1.[1]);
 			}else if(i != 0){
-				close(p1[1]);
-				dup2(p1[0], 0);
-				close(p1[0]);
-				close(p2[0]);
-				dup2(p2[1],1);
-				close(p2[1]);
+				p1=pipes[i];
+				p2=pipes[i+1]
+				close(p1.p[1]);
+				dup2(p1.p[0], 0);
+				close(p1.p[0]);
+				close(p2.p[0]);
+				dup2(p2.p[1],1);
+				close(p2.p[1]);
 			}
 			else{
-				close(p1[1]);
-				dup2(p1[0],0);
-				close(p1[0]);
-				execvp((*mandato).filename, (*mandato).argv);
+				p2=pipes[i+1]
+				close(p1.p[1]);
+				dup2(p1.p[0],0);
+				close(p1.p[0]);
 				exit(1);
 			}
-		}
-
-	}			
-}
+			execvp((*mandato).filename, (*mandato).argv);
+		}// fin del pid==0
+	}//fin del for 			
+}// fin del varios comandos
 
 int main(int argc, char* argv[]){ //inicio main
 	signal(SIGQUIT, SIG_IGN);
