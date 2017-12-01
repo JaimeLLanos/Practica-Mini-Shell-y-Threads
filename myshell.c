@@ -91,21 +91,26 @@ void varioscomandos(tline *mandatos){
 	for (i=0; i<comandos-1; i++){
 		pipe(pipes[i].p);
  	}// fin for creaccion de pipes
-	for(i = 0; i < comandos; i++){//creamos tantos hijos como
-		pids[i] = fork();	   //procesos haya
+	for(i = 0; i <comandos; i++){
+		pids[i] = fork();
 		if(pids[i] < 0){ //si no se puede crear el hijo
 			fprintf(stderr,"Ha ocurrido un error al crear el proceso");
 			exit(1);
 		}// fin if de error
+	}
+	for(i = comandos; i > 0; i--){//creamos tantos hijos como
+		//pids[i] = fork();	  
+		
 		if(pids[i] == 0){ //para el hijo i
 			if(i == (comandos - 1)){
+				redireccionDeEntrada(mandatos);
 				p1=pipes[i];
 				close(p1.p[0]);
 				dup2(p1.p[1],1);
-				close(p1.[1]);
+				close(p1.p[1]);
 			}else if(i != 0){
 				p1=pipes[i];
-				p2=pipes[i+1]
+				p2=pipes[i+1];
 				close(p1.p[1]);
 				dup2(p1.p[0], 0);
 				close(p1.p[0]);
@@ -114,14 +119,18 @@ void varioscomandos(tline *mandatos){
 				close(p2.p[1]);
 			}
 			else{
-				p2=pipes[i+1]
+				redireccionDeSalida(mandatos);
+				p2=pipes[i+1];
 				close(p1.p[1]);
 				dup2(p1.p[0],0);
-				close(p1.p[0]);
-				exit(1);
+				close(p1.p[0]);	
 			}
-			execvp((*mandato).filename, (*mandato).argv);
+			redireccionDeError(mandatos);
+			//waitpid(pids[i+1],NULL,-1);
+			execvp(mandato[i].filename, mandato[i].argv);
+			exit(1);
 		}// fin del pid==0
+		wait(NULL);
 	}//fin del for 			
 }// fin del varios comandos
 
