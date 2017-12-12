@@ -130,10 +130,9 @@ void varioscomandos(tline *mandatos){
 				exit(1);
 			}
 			redireccionDeError(mandatos);
-		wait(NULL);
 		}// fin del pid==0
 	}//fin del for 		
-		
+	wait(NULL);
 }// fin del varios comandos
 
 int main(int argc, char* argv[]){ //inicio main
