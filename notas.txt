@@ -1,0 +1,15 @@
+la practica esta a falta de los dos ultimos apartados
+faltan:
+	-crearlo con varias plantas (puede ser facil)
+	-crearlo pasando tu los valores (mas complicado, no lo vamos a hacer creo yo)
+echale un ojo a todo y entiendelo como funciona, si tienes alguna duda me lo dices y te explico (si tardo en contestarte me pillas trabajando)
+para el apartado de varias plantas te doy una orientacion y lo intentas si puedes/quieres jaja
+es similar a como esta hecho pero lo unico que tienes que hacer es hacer un array de ocupacion por plantas similar a como esta ya hecho
+aleatoriamente que entre en una planta y si esta llena vuelva a comprobar aleatoriamente en otra planta hasta que encuentre una
+(para los camiones tiene que haber 2 plazas libres recuerda)
+puedes poner una variable de parking lleno con otro mutex (habria que hacer un mutex por planta, aunque no creo que sea necesario)
+puede hacer unicamente un mutex global del parking con condicion por si el parking esta lleno, y cuando aparque el coche en la planta
+que corresponda y en su plaza lo libere para que entre otro coche (mas sencillo)
+si hay algo que me falte por decir o algo que no entiendas me escribes. a partir del lunes o el martes, martes seguramente,
+te dejare hechas a bulto las memorias de todo lo que hace cada cosa explicado y luego las retocas si lo prefieres de esa manera
+perdona la tardanza pero me ha sido imposible antes
