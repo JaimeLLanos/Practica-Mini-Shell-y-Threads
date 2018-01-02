@@ -63,8 +63,6 @@ void uncomando(tline *mandatos){
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
 		redireccionDeEntrada(mandatos);
-		redireccionDeSalida(mandatos);
-		redireccionDeError(mandatos);
 		if((*mandato).filename == NULL){
 			fprintf(stderr,"%s: No se encuentra el mandato\n",(*mandato).filename);
 			exit(1);
@@ -74,7 +72,9 @@ void uncomando(tline *mandatos){
 			exit(1);		
 		}
 	} else { 
+		redireccionDeSalida(mandatos);
 		wait(NULL);
+		redireccionDeError(mandatos);
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, SIG_IGN);
 		} //fin padre
