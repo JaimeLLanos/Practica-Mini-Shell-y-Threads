@@ -135,6 +135,16 @@ void varioscomandos(tline *mandatos){
 	wait(NULL);
 }// fin del varios comandos
 
+void cd(tline *mandatos){
+	tcommand *mandato = (*mandatos).commands;
+	if((*mandato).argv[1] == NULL){
+		chdir(getenv("HOME"));
+	}else{
+		chdir((*mandato).argv[1]);
+	}
+}
+
+
 int main(int argc, char* argv[]){ //inicio main
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
@@ -147,7 +157,13 @@ int main(int argc, char* argv[]){ //inicio main
 			printf("msh> ");			
 			mandatos = tokenize(buffer);
 			if ((*mandatos).ncommands == 1) {
-				uncomando(mandatos);
+				tcommand *mandato = (*mandatos).commands;
+				if(strcmp((*mandato).argv[0],"cd") == 0){
+					cd(mandatos);
+				}else{
+					uncomando(mandatos);
+				}
+
 			} else if ((*mandatos).ncommands > 1) {
 				varioscomandos(mandatos);
 			}
@@ -155,3 +171,4 @@ int main(int argc, char* argv[]){ //inicio main
 	} else //fin del if
 		fprintf(stderr,"Error, funcion sin argumentos.\n");
 } //fin del main
+
