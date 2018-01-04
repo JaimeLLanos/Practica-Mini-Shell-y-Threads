@@ -105,10 +105,10 @@ int main (int argc, char* argv[]){ //inicio de main
 	int ncoches[COCHES];
 	int ncamiones[CAMIONES];
 	ocupacion=0;
-	pthread_t coches[COCHES]; //creo que esto no hace falta ponerlo (probar quitandolo)
+	pthread_t coches[COCHES];
 	pthread_mutex_init(&park, NULL);
 	pthread_cond_init(&nolleno, NULL);
-	pthread_t camiones[CAMIONES];//creo que esto no hace falta ponerlo (probar quitandolo)
+	pthread_t camiones[CAMIONES];
 	for (i=0; i<PLAZAS; i++) {
 		parking[i]=0; }
 	for (i=0; i<COCHES; i++){
