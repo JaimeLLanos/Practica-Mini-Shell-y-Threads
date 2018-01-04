@@ -9,7 +9,7 @@
 #define PLAZAS 5
 
 
-//pthread_mutex_t plazas[PLAZAS];
+//pthread_mutex_t plazas[PLAZAS]; (quitar esta linea que no se usa)
 int parking[PLAZAS];
 pthread_mutex_t park; //mutex para el parking cuando este lleno
 int ocupacion;
