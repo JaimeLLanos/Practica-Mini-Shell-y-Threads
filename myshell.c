@@ -13,7 +13,9 @@
 typedef struct {
 	int p[2];
 } tPipe;
-
+//array de tlines que están en background
+tline arrayMand[10]; 
+int cont = 0;
 
 void *redireccionDeEntrada(tline *mandato){
 	int fd;	
@@ -133,10 +135,10 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 				close(p1.p[1]);
 				int x = sizeof(mandato[i].argv);
 				if(strcmp(mandato[i].argv[x], "&") != 0){ 
-				execvp(mandato[i].filename, mandato[i].argv);//...-y se va a ejecutar el último mandato
-				//de esta forma, el último mandato recibirá las salidas de todos los mandatos anteriores para 
-				//asi ejecutarse exactamente como queremos.
-				exit(1);
+					execvp(mandato[i].filename, mandato[i].argv);//...-y se va a ejecutar el último mandato.
+					//De esta forma, el último mandato recibirá las salidas de todos los mandatos anteriores para 
+					//asi ejecutarse exactamente como queremos.
+					exit(1);
 				}else{ //background
 					(*mandatos).background = 1;
 					int pidAux = fork();
@@ -145,6 +147,13 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 						exit(1);
 					}
 					else if(pidAux == 0){ //si es el proceso hijo
+						if(cont < sizeof(arrayMand)){
+							arrayMand[cont] = *mandatos;
+							cont++;
+						}else{
+							printf("No puede haber más procesos en background");
+							exit(1);
+						}
 						execvp(mandato[i].filename, mandato[i].argv);
 						exit(1);
 					}else{
@@ -170,20 +179,16 @@ void cd(tline *mandatos){
 	}
 }
 
-void jobs(tline *arrayMand, int cont){
+void jobs(){
 	int i;
 	for(i = 0; i<=cont; i++){
-		if(arrayMand[i].background == 1){
 			int j;
 			char *cat = "";
 			tcommand *man = (arrayMand[i]).commands;
 			for(j = 0; j<arrayMand[i].ncommands; j++){
 				strcat(cat,(*man).argv[j]);
 			} 
-			printf("[%d] + Running			%s", i+1, cat);
-		}else{
-			printf("¿Funciono?");
-		}
+			printf("[%d] + Running			%s\n", i+1, cat);
 	}
 }
 
@@ -195,7 +200,7 @@ int main(int argc, char* argv[]){ //inicio main
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
 	tline *mandatos; //variable para hacerle el tokenize
-	tline arrayMand[50]; //array de tlines
+	
 	int cont = 0;
 	char buffer[1024];
 	printf("msh> "); //prompt
@@ -204,16 +209,12 @@ int main(int argc, char* argv[]){ //inicio main
 			//recogemos en buffer la entrada de teclado
 			printf("msh> ");			
 			mandatos = tokenize(buffer); //con tokenize, transformamos dicha entrada en un tline
-			if(cont < 50){
-				arrayMand[cont] = *mandatos;
-				cont++;
-			}
 			if ((*mandatos).ncommands == 1) { //si la instruccion es de un solo comando
 				tcommand *mandato = (*mandatos).commands; //se crea esta variable para la comprobacion de argv[0]
 				if(strcmp((*mandato).argv[0],"cd") == 0){ //comprobamos si dicho comando es el comando cd
 					cd(mandatos);
 				}else if(strcmp((*mandato).argv[0],"jobs") == 0){
-					jobs(arrayMand,cont);
+					jobs();
 				}else if(strcmp((*mandato).argv[0],"fg") == 0){
 					fg();
 				}else{
