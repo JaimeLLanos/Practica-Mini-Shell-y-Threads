@@ -182,26 +182,24 @@ void cd(tline *mandatos){
 void jobs(){
 	int i;
 	for(i = 0; i<=cont; i++){
-			int j;
-			char *cat = "";
-			tcommand *man = (arrayMand[i]).commands;
-			for(j = 0; j<arrayMand[i].ncommands; j++){
-				strcat(cat,(*man).argv[j]);
-			} 
-			printf("[%d] + Running			%s\n", i+1, cat);
+		int j;
+		char *cat = "";
+		tcommand *man = (arrayMand[i]).commands;
+		for(j = 0; j<arrayMand[i].ncommands; j++){
+			strcat(cat,(*man).argv[j]);
+		} 
+		printf("[%d] + Running			%s\n", i+1, cat);
 	}
 }
 
 void fg(){
-
+//no implementada
 }
 
 int main(int argc, char* argv[]){ //inicio main
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, SIG_IGN);
-	tline *mandatos; //variable para hacerle el tokenize
-	
-	int cont = 0;
+	tline *mandatos; //variable para hacerle el tokenize	
 	char buffer[1024];
 	printf("msh> "); //prompt
 	if (argc == 1) {
