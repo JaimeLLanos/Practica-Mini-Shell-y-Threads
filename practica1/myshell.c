@@ -11,7 +11,7 @@
 
 //Estructura de tipo de dato tPipe, para facilitar el trabajo con el array de pipes en el método "variosComandos"
 typedef struct {
-	int p[2];
+	char* p[2];
 } tPipe;
 //array de tlines que están en background
 tline arrayMand[10]; 
@@ -117,7 +117,7 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 			}else if((i != 0) && (i<comandos-1)){ //mandato intermedio (ni el primero ni el último)
 				p1=pipes[i-1];
 				p2=pipes[i];
-				char* cadena1= (char*) p1.p[0];
+				char* cadena1=p1.p[0];
 				close(p1.p[1]);
 				close(p2.p[0]);
 				close(p1.p[0]);
@@ -130,7 +130,7 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 			     	redireccionDeSalida(mandatos);
 				redireccionDeError(mandatos);
 				p1=pipes[i-1];
-				char* cadena2= (char*) p1.p[0];
+				char* cadena2=p1.p[0];
 				close(p1.p[1]);
 				close(p1.p[0]);
 				int x = sizeof(mandato[i].argv);
