@@ -92,7 +92,6 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 	int i;
 	tPipe p1;
 	tPipe p2;
-	char* cadena=malloc(2000);
 	for (i = 0; i < comandos-1; i++){
 		pipe(pipes[i].p);
  	}// fin for creaccion de pipes
@@ -120,11 +119,10 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 				p2=pipes[i];
 				close(p1.p[1]);
 				close(p2.p[0]);
-				strcpy(cadena, p1.p[0]);
 				close(p1.p[0]);
 				dup2(1, p2.p[1]); //se va a escribir en la entrada del siguiente pipe (i)-...
 				close(p2.p[1]);
-				execvp(mandato[i].filename, cadena);//...-la ejecucion del mandato i
+				execvp(mandato[i].filename, p1.p[0]);//...-la ejecucion del mandato i
 				exit(1);
 			}
 			else{ //último mandato
@@ -132,11 +130,10 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 				redireccionDeError(mandatos);
 				p1=pipes[i-1];
 				close(p1.p[1]);
-				strcpy(cadena, p1.p[0]);
 				close(p1.p[0]);
 				int x = sizeof(mandato[i].argv);
 				if(strcmp(mandato[i].argv[x], "&") != 0){ 
-					execvp(mandato[i].filename, cadena);//...-y se va a ejecutar el último mandato.
+					execvp(mandato[i].filename, p1.p[0]);//...-y se va a ejecutar el último mandato.
 					//De esta forma, el último mandato recibirá las salidas de todos los mandatos anteriores para 
 					//asi ejecutarse exactamente como queremos.
 					exit(1);
@@ -155,7 +152,7 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 							printf("No puede haber más procesos en background");
 							exit(1);
 						}
-						execvp(mandato[i].filename, cadena);
+						execvp(mandato[i].filename, p1.p[0]);
 						exit(1);
 					}else{
 						wait(NULL);
