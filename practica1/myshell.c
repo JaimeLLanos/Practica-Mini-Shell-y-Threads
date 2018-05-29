@@ -9,11 +9,11 @@
 #include <fcntl.h>
 
 
-//Estructura de tipo de dato tPipe, para facilitar el trabajo con el array de pipes en el mÈtodo "variosComandos"
+//Estructura de tipo de dato tPipe, para facilitar el trabajo con el array de pipes en el m√©todo "variosComandos"
 typedef struct {
 	int p[2];
 } tPipe;
-//array de tlines que est·n en background
+//array de tlines que est√°n en background
 tline arrayMand[10]; 
 int cont = 0;
 
@@ -92,12 +92,13 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 	int i;
 	tPipe p1;
 	tPipe p2;
+	char* cadena=malloc(2000);
 	for (i = 0; i < comandos-1; i++){
 		pipe(pipes[i].p);
  	}// fin for creaccion de pipes
 	signal(SIGQUIT, SIG_DFL);
 	signal(SIGINT, SIG_DFL);
-	for(i = 0; i < comandos; i++){//creamos tantos hijos como comandos tenga la instrucciÛn
+	for(i = 0; i < comandos; i++){//creamos tantos hijos como comandos tenga la instrucci√≥n
 		pids[i] = fork();	  
 		if(pids[i] < 0){ //si no se puede crear el hijo
 			fprintf(stderr,"Ha ocurrido un error al crear el proceso");
@@ -108,35 +109,35 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 			if(i == 0){ //primer mandato
 				redireccionDeEntrada(mandatos);
 				p1=pipes[i];
-				dup2(p1.p[1],1); //se va a escribir en la entrada del pipe-...
 				close(p1.p[0]);
+				dup2(1,p1.p[1]); //se va a escribir en la entrada del pipe-...
 				close(p1.p[1]);
 				execvp(mandato[i].filename, mandato[i].argv); //...-la ejecucion del primer mandato
 				exit(1);
 
-			}else if((i != 0) && (i<comandos-1)){ //mandato intermedio (ni el primero ni el ˙ltimo)
+			}else if((i != 0) && (i<comandos-1)){ //mandato intermedio (ni el primero ni el √∫ltimo)
 				p1=pipes[i-1];
 				p2=pipes[i];
-				dup2(p1.p[0],0); //se va a leer de la salida del pipe anterior (i-1)
-				close(p1.p[0]);
 				close(p1.p[1]);
-				dup2(p2.p[1],1); //se va a escribir en la entrada del siguiente pipe (i)-...
 				close(p2.p[0]);
+				strcpy(cadena, p1.p[0]);
+				close(p1.p[0]);
+				dup2(1, p2.p[1]); //se va a escribir en la entrada del siguiente pipe (i)-...
 				close(p2.p[1]);
-				execvp(mandato[i].filename, mandato[i].argv);//...-la ejecucion del mandato i
+				execvp(mandato[i].filename, cadena);//...-la ejecucion del mandato i
 				exit(1);
 			}
-			else{ //˙ltimo mandato
+			else{ //√∫ltimo mandato
 			     	redireccionDeSalida(mandatos);
 				redireccionDeError(mandatos);
 				p1=pipes[i-1];
-				dup2(p1.p[0],0); //se va a leer de la salida del ˙ltimo pipe-...
-				close(p1.p[0]);
 				close(p1.p[1]);
+				strcpy(cadena, p1.p[0]);
+				close(p1.p[0]);
 				int x = sizeof(mandato[i].argv);
 				if(strcmp(mandato[i].argv[x], "&") != 0){ 
-					execvp(mandato[i].filename, mandato[i].argv);//...-y se va a ejecutar el ˙ltimo mandato.
-					//De esta forma, el ˙ltimo mandato recibir· las salidas de todos los mandatos anteriores para 
+					execvp(mandato[i].filename, cadena);//...-y se va a ejecutar el √∫ltimo mandato.
+					//De esta forma, el √∫ltimo mandato recibir√° las salidas de todos los mandatos anteriores para 
 					//asi ejecutarse exactamente como queremos.
 					exit(1);
 				}else{ //background
@@ -151,10 +152,10 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 							arrayMand[cont] = *mandatos;
 							cont++;
 						}else{
-							printf("No puede haber m·s procesos en background");
+							printf("No puede haber m√°s procesos en background");
 							exit(1);
 						}
-						execvp(mandato[i].filename, mandato[i].argv);
+						execvp(mandato[i].filename, cadena);
 						exit(1);
 					}else{
 						wait(NULL);
@@ -165,7 +166,8 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 		}// fin del pid==0
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, SIG_IGN);
-	}//fin del for 		
+	}//fin del for
+	free(cadena);
 	wait(NULL);
 
 }// fin del varios comandos
@@ -173,7 +175,7 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 void cd(tline *mandatos){
 	tcommand *mandato = (*mandatos).commands;
 	if((*mandato).argv[1] == NULL){ //si no recibe un directorio
-		chdir(getenv("HOME")); //el comando cd nos llevar· al directorio home
+		chdir(getenv("HOME")); //el comando cd nos llevar√° al directorio home
 	}else{
 		chdir((*mandato).argv[1]); //en caso contrario cambiamos al directorio especificado
 	}
@@ -219,7 +221,7 @@ int main(int argc, char* argv[]){ //inicio main
 					unComando(mandatos);
 				}
 
-			} else if ((*mandatos).ncommands > 1) { //si la instruccion leida contiene m·s de un mandato (usa pipes)
+			} else if ((*mandatos).ncommands > 1) { //si la instruccion leida contiene m√°s de un mandato (usa pipes)
 				variosComandos(mandatos);
 			}
 		} //fin del while
