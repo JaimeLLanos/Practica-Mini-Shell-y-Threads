@@ -11,7 +11,7 @@
 
 //Estructura de tipo de dato tPipe, para facilitar el trabajo con el array de pipes en el método "variosComandos"
 typedef struct {
-	char* p[2];
+	int p[2];
 } tPipe;
 //array de tlines que están en background
 tline arrayMand[10]; 
@@ -108,8 +108,8 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 			if(i == 0){ //primer mandato
 				redireccionDeEntrada(mandatos);
 				p1=pipes[i];
+				dup2(p1.p[1],1); //se va a escribir en la entrada del pipe-...
 				close(p1.p[0]);
-				dup2(1,p1.p[1]); //se va a escribir en la entrada del pipe-...
 				close(p1.p[1]);
 				execvp(mandato[i].filename, mandato[i].argv); //...-la ejecucion del primer mandato
 				exit(1);
@@ -117,25 +117,25 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 			}else if((i != 0) && (i<comandos-1)){ //mandato intermedio (ni el primero ni el último)
 				p1=pipes[i-1];
 				p2=pipes[i];
-				char* cadena1=p1.p[0];
-				close(p1.p[1]);
-				close(p2.p[0]);
+				dup2(p1.p[0],0); //se va a leer de la salida del pipe anterior (i-1)
 				close(p1.p[0]);
-				dup2(1, p2.p[1]); //se va a escribir en la entrada del siguiente pipe (i)-...
+				close(p1.p[1]);
+				dup2(p2.p[1],1); //se va a escribir en la entrada del siguiente pipe (i)-...
+				close(p2.p[0]);
 				close(p2.p[1]);
-				execvp(mandato[i].filename, cadena1);//...-la ejecucion del mandato i
+				execvp(mandato[i].filename, mandato[i].argv);//...-la ejecucion del mandato i
 				exit(1);
 			}
 			else{ //último mandato
 			     	redireccionDeSalida(mandatos);
 				redireccionDeError(mandatos);
 				p1=pipes[i-1];
-				char* cadena2=p1.p[0];
-				close(p1.p[1]);
+				dup2(p1.p[0],0); //se va a leer de la salida del último pipe-...
 				close(p1.p[0]);
+				close(p1.p[1]);
 				int x = sizeof(mandato[i].argv);
 				if(strcmp(mandato[i].argv[x], "&") != 0){ 
-					execvp(mandato[i].filename, cadena2);//...-y se va a ejecutar el último mandato.
+					execvp(mandato[i].filename, mandato[i].argv);//...-y se va a ejecutar el último mandato.
 					//De esta forma, el último mandato recibirá las salidas de todos los mandatos anteriores para 
 					//asi ejecutarse exactamente como queremos.
 					exit(1);
@@ -154,7 +154,7 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 							printf("No puede haber más procesos en background");
 							exit(1);
 						}
-						execvp(mandato[i].filename, cadena2);
+						execvp(mandato[i].filename, mandato[i].argv);
 						exit(1);
 					}else{
 						wait(NULL);
@@ -165,7 +165,7 @@ void variosComandos(tline *mandatos){ //n mandatos con el uso de pipes
 		}// fin del pid==0
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, SIG_IGN);
-	}//fin del for
+	}//fin del for 		
 	wait(NULL);
 
 }// fin del varios comandos
